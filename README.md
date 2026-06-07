@@ -18,3 +18,16 @@ Presentation guidelines
 ● Avoid jumping forward and backward during the presentation
 ● Ensure to include page numbers on each slide
 ○ Show the current slide number out of the total slide number
+
+Presentation suggested scheme
+
+● Title: Report the project name, your names, and course information
+● Outline: Briefly describe the presentation workflow
+● Problem Statement: The challenge you are addressing
+● State of the Art: How current research approaches this challenge
+● Proposed Method: How you approached this challenge
+● Dataset: The data you used for the project
+● Experimental Setup: How you configured the elements of the project
+● Model Evaluation: How you assessed the performance of your model
+● Conclusions: Final considerations and future work
+● References: Where you drew inspiration from
