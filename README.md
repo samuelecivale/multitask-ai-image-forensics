@@ -54,8 +54,6 @@ Introduces a high-frequency residual branch to specifically target re-digitizati
 - Li et al., "Bridging the Gap Between Ideal and Real-world Evaluation: Benchmarking AI-Generated Image Detection", ICCV 2025.
 - Tan & Le, "EfficientNet: Rethinking Model Scaling", ICML 2019.
 
-Your professional slide deck on Joint AI-Image Detection and Alteration recognition is ready! I have meticulously integrated the data from both your Colab and Documentation runs to ensure a comprehensive analysis. Let me know if you would like to adjust any of the visual elements or technical details.
-# Project_CV
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1r4UGEQoh6ycqY3Xq3McsC5gIJpXasoPo#scrollTo=W_YiF-EaMW4_)
 
 [![Google Docs](https://img.shields.io/badge/Google%20Docs-Documento-blue?logo=googledocs&logoColor=white&style=for-the-badge)](https://docs.google.com/document/d/1wLkI6jA8WNPJ3mrpB7pzGrYWUvwfp2-UzjrPwB9O9H8/edit?tab=t.0)
