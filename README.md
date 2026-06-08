@@ -292,14 +292,5 @@ AI-Detection-Forensics/
 
 ---
 
-## Export / Submission Checklist
 
-Before submission:
-
-* [ ] Export the presentation as PowerPoint.
-* [ ] Export the presentation as PDF.
-* [ ] Upload the repository and presentation to GitHub.
-* [ ] Copy the presentation to a USB drive.
-* [ ] Verify that all plots and tables are readable on a white background.
-* [ ] Check that all reported results match the notebook and analysis document.
 
