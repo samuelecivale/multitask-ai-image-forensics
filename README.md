@@ -50,7 +50,7 @@ The transformation labels are defined as follows:
 
 ---
 
-## Task Definition
+## Task Definition DA FARE 
 
 The model receives one input image and predicts two labels at the same time.
 
@@ -63,7 +63,7 @@ The goal is to verify whether the auxiliary transformation task can improve the 
 
 ---
 
-## Proposed Method
+## Proposed Method DA FARE
 
 The proposed architecture is based on **EfficientNet-B0 pretrained on ImageNet**.
 
@@ -87,7 +87,7 @@ where:
 
 ---
 
-## Experimental Setup
+## Experimental Setup DA FARE
 
 | Component      | Configuration                 |
 | :------------- | :---------------------------- |
@@ -116,7 +116,7 @@ The baseline is trained only for the real/fake task, while the multi-task models
 
 ---
 
-## Baseline Results
+## Baseline Results DA FARE
 
 The baseline is a single-task EfficientNet-B0 trained only for real/fake classification.
 
@@ -133,7 +133,7 @@ The main issue is overfitting: the model becomes very confident on the training 
 
 ---
 
-## Multi-Task Learning Results
+## Multi-Task Learning Results DA FARE
 
 The multi-task setup improves the real/fake classification accuracy in all tested configurations.
 
@@ -154,23 +154,23 @@ Compared to the baseline, this corresponds to an improvement of:
 
 ---
 
-## Ablation Study Interpretation
+## Ablation Study Interpretation DA FARE
 
 The ablation study shows a clear trade-off between the two tasks.
 
-### Alpha = 0.8
+### Alpha = 0.8 DA FARE
 
 This configuration gives the best performance on the main task.
 
 The model gives more importance to real/fake classification, while the transformation task still acts as a regularizer. This helps reduce overfitting without distracting the model too much from the primary objective.
 
-### Alpha = 0.5
+### Alpha = 0.5 DA FARE
 
 This configuration is the most balanced.
 
 It achieves slightly lower real/fake accuracy than `alpha = 0.8`, but it improves transformation recognition and shows more stable validation behavior.
 
-### Alpha = 0.2
+### Alpha = 0.2 DA FARE
 
 This configuration gives more importance to the transformation task.
 
@@ -178,7 +178,7 @@ It obtains the best transformation accuracy, but the real/fake task receives les
 
 ---
 
-## Artifact-Aware Variant
+## Artifact-Aware Variant DA FARE
 
 An additional experiment introduces an **Artifact-Aware Multi-Task EfficientNet**.
 
@@ -203,7 +203,7 @@ This suggests that explicitly modeling high-frequency artifacts can help make th
 
 ---
 
-## Final Results Summary
+## Final Results Summary DA FARE
 
 | Model                    | Real/Fake Accuracy | Transformation Accuracy | Robustness Drop | Main Takeaway                 |
 | :----------------------- | :----------------: | :---------------------: | :-------------: | :---------------------------- |
@@ -215,7 +215,7 @@ This suggests that explicitly modeling high-frequency artifacts can help make th
 
 ---
 
-## Main Conclusions
+## Main Conclusions DA FARE
 
 The experiments support three main conclusions.
 
@@ -233,7 +233,7 @@ Overall, the results suggest that post-processing traces and image history are u
 
 ---
 
-## Future Work
+## Future Work DA FARE
 
 Possible future improvements include:
 
@@ -247,7 +247,7 @@ Possible future improvements include:
 
 ---
 
-## Installation and Usage
+## Installation and Usage DA FARE
 
 Clone the repository:
 
@@ -258,21 +258,21 @@ cd AI-Detection-Forensics
 
 Open the Colab notebook:
 
-[Open in Google Colab](https://colab.research.google.com/drive/1r4UGEQoh6ycqY3Xq3McsC5gIJpXasoPo)
+[Open in Google Colab](https://colab.research.google.com/drive/1pxWcgsUvCyDdLAtXxv-lSceOoOWlS7na#scrollTo=KPeAZNOdaN3s)
 
 Make sure that the RRDataset subset is available in the project root folder or mounted through Google Drive.
 
 ---
 
-## Repository Structure
+## Repository Structure DA FARE
 
 ```text
 AI-Detection-Forensics/
 │
-├── CV_project2.ipynb          # Main implementation notebook
-├── CV_Project.pdf             # Result analysis and interpretation
+├── CV_project.ipynb          # Main implementation notebook
+├── CV_project_presentation.pptx             # Result analysis and interpretation
 ├── README.md                  # Project documentation
-└── [dataset folder]           # RRDataset subset, if locally available
+
 ```
 
 ---
