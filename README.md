@@ -91,12 +91,7 @@ This setup encourages the backbone to learn features useful for both image prove
 
 The network is optimized using a joint objective:
 
-$$
-\mathcal{L}_{\text{total}}
-=
-\lambda_{rf}\mathcal{L}_{\text{real/fake}}
-+
-\lambda_{tr}\mathcal{L}_{\text{transformation}} $$
+$$ \mathcal{L}_{\text{total}} = \lambda_{rf}\mathcal{L}_{\text{real/fake}} +\lambda_{tr}\mathcal{L}_{\text{transformation}} $$
 
 where:
 
