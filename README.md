@@ -1,331 +1,205 @@
-# Multi-Task AI Image Forensics
+# Multi-Task AI Image Forensics with EfficientNet
 
-Deep-learning system for the **joint detection of AI-generated images and post-processing transformations**, designed to study the robustness of synthetic-image detectors under realistic image alterations.
+![PyTorch](https://img.shields.io/badge/PyTorch-Deep%20Learning-red)
+![EfficientNet](https://img.shields.io/badge/Backbone-EfficientNet--B0-green)
+![Computer Vision](https://img.shields.io/badge/Computer%20Vision-Image%20Forensics-blue)
+![Multi-Task](https://img.shields.io/badge/Learning-Multi--Task-purple)
 
-The project uses an **EfficientNet-B0** backbone with a multi-task architecture that simultaneously predicts:
+A multi-task computer-vision system for jointly detecting **AI-generated images** and identifying **post-processing transformations** applied to them.
 
-1. whether an image is **real or AI-generated**;
-2. which **post-processing transformation** has been applied.
+The model uses a shared EfficientNet-B0 backbone with two classification heads:
 
-The selected model achieved **91.17% accuracy on real-vs-AI image classification**.
+1. **Real vs AI-generated image detection**
+2. **Transformation classification**
 
----
-
-## Motivation
-
-AI-generated image detection is increasingly relevant as generative models produce images that are progressively harder to distinguish from real photographs.
-
-A practical limitation of many detectors is that images encountered in real-world scenarios are rarely identical to the original generated samples.
-
-They may have been:
-
-* compressed;
-* resized;
-* blurred;
-* sharpened;
-* filtered;
-* or otherwise post-processed.
-
-These transformations can alter the low-level visual artifacts used by synthetic-image detectors.
-
-This project investigates whether explicitly learning to recognize post-processing transformations alongside the real/fake classification task can help the network learn richer and more robust visual representations.
+The project studies whether learning post-processing artifacts as an auxiliary task improves the robustness of synthetic-image detection.
 
 ---
 
-## Problem Formulation
+## Main Result
 
-Given an input image (x), the model jointly solves two classification tasks.
+| Model | Real / AI | Transformation |
+|---|---:|---:|
+| Real/Fake single-task baseline | **89.92%** | — |
+| Transformation single-task baseline | — | **86.08%** |
+| Multi-task, α = 0.5 | **91.17%** | **83.42%** |
 
-### Task 1 — Image Origin Classification
+The selected multi-task configuration therefore produces:
 
-Predict whether the image is:
+$$\mathbf{+1.25}\text{ percentage points}
+$$
 
-```text
-Real
-or
-AI-Generated
-```
+on the primary Real-vs-AI task, while transformation recognition decreases by
 
-### Task 2 — Transformation Classification
+$$\mathbf{-2.67}\text{ percentage points}$$
 
-Predict the post-processing operation associated with the image.
+relative to its dedicated single-task baseline.
 
-The two tasks share the same visual backbone but use separate classification heads.
+This exposes a useful **multi-task trade-off** rather than a uniform improvement across both objectives.
+
+---
+
+## Problem
+
+AI-generated image detectors often learn shortcuts tied to a particular generator or image-processing pipeline.
+
+Real-world images, however, may undergo transformations such as:
+
+- resizing;
+- resampling;
+- re-digitization;
+- other post-processing operations.
+
+The project investigates whether explicitly teaching the network to recognize these transformations can force the shared representation to learn features useful for more robust AI-image detection.
 
 ---
 
 ## Architecture
 
-The model is based on **EfficientNet-B0**, used as a shared feature extractor.
-
 ```text
-                         ┌──────────────────────┐
-                         │     Input Image      │
-                         └──────────┬───────────┘
-                                    │
-                                    ▼
-                         ┌──────────────────────┐
-                         │   EfficientNet-B0    │
-                         │  Shared Backbone     │
-                         └──────────┬───────────┘
-                                    │
-                         Shared Feature Vector
-                                    │
-                  ┌─────────────────┴─────────────────┐
-                  │                                   │
-                  ▼                                   ▼
-        ┌───────────────────┐               ┌─────────────────────┐
-        │ Real / AI Head    │               │ Transformation Head │
-        └─────────┬─────────┘               └──────────┬──────────┘
-                  │                                    │
-                  ▼                                    ▼
-            Real / Fake                         Transformation
-            Prediction                           Prediction
+                   Input image
+                       │
+                       ▼
+              EfficientNet-B0
+               shared backbone
+                       │
+                Shared features
+                       │
+            ┌──────────┴──────────┐
+            ▼                     ▼
+      Real/Fake head       Transform head
+         2 classes            3 classes
+            │                     │
+            ▼                     ▼
+       Real vs AI       Processing category
 ```
 
-This setup encourages the backbone to learn features useful for both image provenance and transformation recognition.
+The pretrained EfficientNet classifier is replaced by a shared feature representation followed by two independent linear heads.
 
 ---
 
-## Multi-Task Learning
+## Multi-Task Objective
 
-The network is optimized using a joint objective:
+Training minimizes
 
-$$ \mathcal{L}_{\text{total}} = \lambda_{rf}\mathcal{L}_{\text{real/fake}} +\lambda_{tr}\mathcal{L}_{\text{transformation}} $$
+$$\mathcal{L}=\alpha\mathcal{L}_{RF}+(1-\alpha)\mathcal{L}_{T}$$
 
 where:
 
-- $\mathcal{L}_{\text{real/fake}}$ is the classification loss for image origin;
-- $\mathcal{L}_{\text{transformation}}$ is the transformation-classification loss;
-- $\lambda_{rf}$ and $\lambda_{tr}$ control the contribution of the two objectives.
+- $$\(\mathcal{L}_{RF}\)$$ is the Real/Fake cross-entropy loss;
+- $$\(\mathcal{L}_{T}\)$$ is the transformation-classification loss;
+- $$\(\alpha\)$$ controls the trade-off between the two tasks.
 
-The key idea is that transformation recognition acts as an auxiliary task, potentially forcing the backbone to capture information about how image statistics change after post-processing.
+The experiments compare multiple values of
 
----
+$$\alpha\in\{0.2,0.5,0.8\}$$
 
-## Dataset
-
-Experiments were conducted using the **RRDataset**, containing real and AI-generated images together with post-processing variants.
-
-The evaluation focuses on two related questions:
-
-1. **Can the model reliably distinguish real images from AI-generated ones?**
-2. **Can it simultaneously identify transformations applied to those images?**
-
-The dataset is divided into training, validation, and test subsets to evaluate generalization on unseen samples.
+against independent single-task baselines.
 
 ---
 
-## Experimental Pipeline
+## Training Pipeline
 
-The overall workflow is:
+The experiments use:
+
+- ImageNet-pretrained EfficientNet-B0;
+- shared feature extraction;
+- cross-entropy classification losses;
+- Adam optimization;
+- automatic mixed precision when available;
+- validation-based model selection;
+- controlled loss-weight ablations.
+
+The best multi-task configuration is selected based on joint validation performance rather than only one output head.
+
+---
+
+## What the Experiment Shows
+
+The auxiliary task does **not** improve every metric simultaneously.
+
+Instead, the α=0.5 model improves the main forensic task while reducing transformation-classification accuracy.
+
+This suggests that the shared backbone learns a representation that is more useful for distinguishing real from generated images, but the two tasks still compete for representational capacity.
+
+That interference is itself an important result when designing multi-task forensic systems.
+
+---
+
+## Additional Experiments
+
+The notebook also explores an artifact-aware multi-task variant and compares:
+
+- standard multi-task learning;
+- artifact-aware training;
+- single-task baselines;
+- robustness under image transformations.
+
+This allows the project to examine both predictive performance and cross-task robustness.
+
+---
+
+## Repository Structure
 
 ```text
-Dataset
-   │
-   ▼
-Pre-processing / Augmentation
-   │
-   ▼
-Train / Validation / Test Split
-   │
-   ▼
-EfficientNet-B0
-   │
-   ▼
-Multi-Task Training
-   │
-   ├── Real/Fake Loss
-   └── Transformation Loss
-   │
-   ▼
-Model Selection
-   │
-   ▼
-Final Evaluation
+.
+├── CV_project.ipynb
+├── CV_project_presentation.pptx
+└── README.md
 ```
 
-During training, both objectives are optimized jointly.
-
-Validation performance is used to select the final model configuration before evaluation on the held-out test data.
-
 ---
 
-## Key Results
+## Running the Project
 
-The selected model achieved:
-
-| Metric                                       |                                 Result |
-| -------------------------------------------- | -------------------------------------: |
-| Real vs AI-generated classification accuracy |                             **91.17%** |
-| Architecture                                 |                        EfficientNet-B0 |
-| Learning strategy                            |                    Multi-task learning |
-| Tasks                                        | Origin + transformation classification |
-
-The multi-task formulation produced a trade-off between the two objectives.
-
-Compared with the corresponding baseline configuration:
-
-* transformation recognition improved by approximately **+0.75 percentage points**;
-* real/fake classification decreased by approximately **−1.08 percentage points**.
-
-This suggests that auxiliary transformation supervision can improve the model's awareness of post-processing artifacts, although optimizing both objectives does not automatically improve the primary real/fake classification task.
-
----
-
-## Main Finding
-
-A key result of the project is that **multi-task learning is not automatically equivalent to higher real/fake detection accuracy**.
-
-Instead, the experiment highlights a more interesting trade-off:
-
-> Learning transformations jointly with image provenance improves the model's ability to reason about post-processing artifacts, while slightly reducing performance on the binary real/fake task.
-
-This indicates that the two objectives are related but not perfectly aligned.
-
-The result is particularly relevant for real-world image-forensics systems, where robustness to transformations may be as important as performance on clean benchmark images.
-
----
-
-## Why EfficientNet-B0?
-
-EfficientNet-B0 provides a useful balance between:
-
-* model capacity;
-* computational efficiency;
-* transfer-learning performance;
-* parameter count.
-
-This makes it suitable for experimenting with multiple training configurations without requiring an excessively large computational budget.
-
-Its convolutional features also provide a strong baseline for detecting visual and statistical artifacts associated with synthetic images.
-
----
-
-## Evaluation
-
-Performance is evaluated separately for the two prediction heads.
-
-### Real / AI Classification
-
-Measures the model's ability to distinguish authentic images from AI-generated content.
-
-Relevant metrics include:
-
-* accuracy;
-* class-specific performance;
-* confusion matrix.
-
-### Transformation Classification
-
-Measures whether the network can identify the post-processing operation associated with an image.
-
-This provides additional information about the type of image statistics learned by the shared backbone.
-
----
-
-## Robustness Perspective
-
-The project is motivated by a realistic deployment scenario:
+Open:
 
 ```text
-AI-generated image
-        │
-        ▼
-Post-processing
-        │
-        ├── Compression
-        ├── Resizing
-        ├── Filtering
-        └── Other alterations
-        │
-        ▼
-Detection System
+CV_project.ipynb
 ```
 
-A detector that only learns artifacts present in pristine generated images may fail when those artifacts are modified.
+in Jupyter or Google Colab.
 
-Jointly learning transformation information is therefore explored as a way of making the representation more aware of these changes.
+The notebook contains the complete workflow:
 
----
+```text
+dataset loading
+      ↓
+preprocessing
+      ↓
+single-task baselines
+      ↓
+multi-task EfficientNet
+      ↓
+loss-weight ablation
+      ↓
+evaluation
+      ↓
+robustness analysis
+```
 
-## Tech Stack
-
-* **Python**
-* **PyTorch**
-* **EfficientNet-B0**
-* **Computer Vision**
-* **Deep Learning**
-* **Transfer Learning**
-* **Multi-Task Learning**
-* **Image Classification**
-* **Image Forensics**
-
----
-
-## Skills Demonstrated
-
-This project covers several practical deep-learning and computer-vision skills:
-
-* designing multi-head neural-network architectures;
-* transfer learning with convolutional backbones;
-* multi-task loss formulation;
-* dataset preprocessing;
-* image classification;
-* model training and validation;
-* quantitative model comparison;
-* robustness analysis;
-* experiment design;
-* interpretation of conflicting objectives.
+Update the dataset path to point to the local copy of the project dataset before running the experiments.
 
 ---
 
-## Limitations
+## What This Project Demonstrates
 
-The project is an experimental study rather than a production-ready AI-content detector.
-
-Important limitations include:
-
-* performance depends on the generators represented in the dataset;
-* unseen post-processing pipelines may behave differently;
-* robustness to completely unseen image generators is not guaranteed;
-* the multi-task objective introduces a trade-off between the two prediction tasks;
-* classification accuracy alone does not capture every aspect of forensic reliability.
-
-The reported results should therefore be interpreted within the experimental setup used in the project.
-
----
-
-## Possible Extensions
-
-Several directions could extend this work:
-
-* evaluate on completely unseen generative models;
-* investigate stronger vision backbones;
-* compare CNNs with Vision Transformers;
-* study frequency-domain features;
-* introduce adaptive weighting between the two losses;
-* use uncertainty-aware predictions;
-* evaluate more aggressive image transformations;
-* study cross-dataset generalization;
-* investigate contrastive or self-supervised representations.
-
-An especially interesting direction would be dynamically adjusting the relative contribution of the two tasks during training instead of using a fixed multi-task weighting.
+- Deep Learning
+- Computer Vision
+- AI-Generated Image Detection
+- Image Forensics
+- EfficientNet
+- Transfer Learning
+- Multi-Task Learning
+- Auxiliary Objectives
+- Hyperparameter Ablation
+- Robustness Evaluation
+- PyTorch
 
 ---
 
-## Project Context
+## Key Takeaway
 
-This project was developed as part of the **Computer Vision** coursework of the MSc in Artificial Intelligence and Robotics at Sapienza University of Rome.
+The project shows that auxiliary supervision can improve the primary AI-image forensic task even when the auxiliary classifier itself becomes less accurate.
 
-The focus was not only on obtaining high classification accuracy, but also on analyzing the effect of post-processing transformations and the interaction between multiple related learning objectives.
-
----
-
-## Authors
-
-**Samuele Civale**
-MSc Artificial Intelligence and Robotics
-Sapienza University of Rome
-
-GitHub: [@samuelecivale](https://github.com/samuelecivale)
+Rather than assuming that multi-task learning universally improves all outputs, the experiments quantify the **performance trade-off introduced by shared representations**.
