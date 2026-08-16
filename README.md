@@ -91,20 +91,19 @@ This setup encourages the backbone to learn features useful for both image prove
 
 The network is optimized using a joint objective:
 
-[
-\mathcal{L}_{total}
-===================
-
-\lambda_{rf}\mathcal{L}*{real/fake}
+$$
+\mathcal{L}_{\text{total}}
+=
+\lambda_{rf}\mathcal{L}_{\text{real/fake}}
 +
-\lambda*{tr}\mathcal{L}_{transformation}
-]
+\lambda_{tr}\mathcal{L}_{\text{transformation}}
+$$
 
 where:
 
-* (\mathcal{L}_{real/fake}) is the classification loss for image origin;
-* (\mathcal{L}_{transformation}) is the transformation-classification loss;
-* (\lambda_{rf}) and (\lambda_{tr}) control the contribution of the two objectives.
+- $\mathcal{L}_{\text{real/fake}}$ is the classification loss for image origin;
+- $\mathcal{L}_{\text{transformation}}$ is the transformation-classification loss;
+- $\lambda_{rf}$ and $\lambda_{tr}$ control the contribution of the two objectives.
 
 The key idea is that transformation recognition acts as an auxiliary task, potentially forcing the backbone to capture information about how image statistics change after post-processing.
 
