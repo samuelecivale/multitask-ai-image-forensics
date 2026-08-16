@@ -96,8 +96,7 @@ $$
 =
 \lambda_{rf}\mathcal{L}_{\text{real/fake}}
 +
-\lambda_{tr}\mathcal{L}_{\text{transformation}}
-$$
+\lambda_{tr}\mathcal{L}_{\text{transformation}} $$
 
 where:
 
